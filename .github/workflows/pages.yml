@@ -27,6 +27,18 @@ jobs:
       - name: Build and verify brand image
         shell: bash
         run: |
+          cat > /tmp/chunks.sha256 <<'EOF'
+          b97719d83402949864af9c98fd246023596d4b32242fd2596825b8fbf8690e05  assets/brand-v2-part01.txt
+          211a05f8b4c8f2842eee551f949ba7615ab3101f77807c0f53170d0fbc655924  assets/brand-v2-part02.txt
+          a5bdc2734a57b36783e08b3b44416549f8e8a6971a997792fcfb319a5b2d6c4f  assets/brand-v2-part03.txt
+          c0d109ab331a779cbcb469807677f35a5db12d43cf04a25c50d0a3d25f17e71f  assets/brand-v2-part04.txt
+          fd1df29653b90ed03c227b3480f13c5bb3de08d218987317a26da1a3454cdf54  assets/brand-v2-part05.txt
+          a2fee748958f27c904f95709e1fef788b42b7bd3499301d6995f0dee8bd6b701  assets/brand-v2-part06.txt
+          25689aa23ef1d075148d0f705a64373f4494fb90110f659859b26827de846914  assets/brand-v2-part07.txt
+          5c86892b40109ffa5d221c994cae8553c2131b5b0e4dd8d7356d2cdb7a6ed015  assets/brand-v2-part08.txt
+          8396ef72dc0c6061291dfde8105af5a7417f1037576bd326ee2be60d21e040fa  assets/brand-v2-part09.txt
+          EOF
+          sha256sum -c /tmp/chunks.sha256
           cat assets/brand-v2-part01.txt \
               assets/brand-v2-part02.txt \
               assets/brand-v2-part03.txt \
