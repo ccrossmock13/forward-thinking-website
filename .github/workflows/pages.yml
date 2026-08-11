@@ -23,12 +23,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Build brand image
+      - name: Build and verify brand image
         shell: bash
         run: |
           mkdir -p assets
           base64 --decode assets/brand.b64 > assets/forward-thinking-brand.jpg
-          file assets/forward-thinking-brand.jpg
+          echo "3733bbfa0fcadf769c87ef1c4cea7a1fdebca1d4b7b0996bf415e08da757e987  assets/forward-thinking-brand.jpg" | sha256sum -c -
+          file assets/forward-thinking-brand.jpg | grep -q "JPEG image data"
+          test -s assets/forward-thinking-brand.jpg
       - name: Setup Pages
         uses: actions/configure-pages@v5
         with:
