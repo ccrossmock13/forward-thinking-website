@@ -23,22 +23,35 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Build and verify brand image
         shell: bash
         run: |
-          mkdir -p assets
-          base64 --decode assets/brand.b64 > assets/forward-thinking-brand.jpg
-          echo "74347bb8afd9b2a055fb11f2317e9e4214e484cf6fb60a5d4be964a1700312d2  assets/forward-thinking-brand.jpg" | sha256sum -c -
+          cat assets/brand-v2-part01.txt \
+              assets/brand-v2-part02.txt \
+              assets/brand-v2-part03.txt \
+              assets/brand-v2-part04.txt \
+              assets/brand-v2-part05.txt \
+              assets/brand-v2-part06.txt \
+              assets/brand-v2-part07.txt \
+              assets/brand-v2-part08.txt \
+              assets/brand-v2-part09.txt > /tmp/brand.b64
+          base64 --decode /tmp/brand.b64 > assets/forward-thinking-brand.jpg
+          echo "b767518d13500bad9fcd1b3b96331a7a7e550a87b44db75bd9d50d0979f22576  assets/forward-thinking-brand.jpg" | sha256sum -c -
+          test "$(stat -c%s assets/forward-thinking-brand.jpg)" = "40117"
           file assets/forward-thinking-brand.jpg | grep -q "JPEG image data"
-          test -s assets/forward-thinking-brand.jpg
+          rm -f assets/brand-v2-part*.txt assets/brand.b64 assets/forward-thinking-brand.webp
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
         with:
           enablement: true
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
