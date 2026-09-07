@@ -4,6 +4,8 @@ const toggle=document.getElementById('menuToggle');
 const nav=document.getElementById('nav');
 
 const HERO_FADE_MS=10000;
+const HEAD_START_DELAY_MS=500;
+const HEAD_STAGGER_MS=1800;
 let heroFadeStartedAt=0;
 let ambientStarted=false;
 
@@ -52,12 +54,32 @@ function startAmbientForCurrentFade(){
   if(remaining>1200)createAmbientSwell(remaining);
 }
 
+function prepareHeadSequence(){
+  const heroArt=document.querySelector('.hero-art');
+  if(!heroArt||heroArt.querySelector('.head-mask'))return;
+  for(let i=1;i<=4;i++){
+    const mask=document.createElement('span');
+    mask.className=`head-mask head-mask-${i}`;
+    mask.setAttribute('aria-hidden','true');
+    heroArt.appendChild(mask);
+  }
+}
+
+function startHeadSequence(){
+  document.querySelectorAll('.head-mask').forEach((mask,index)=>{
+    setTimeout(()=>mask.classList.add('revealed'),HEAD_START_DELAY_MS+index*HEAD_STAGGER_MS);
+  });
+}
+
+prepareHeadSequence();
+
 window.addEventListener('load',()=>{
   setTimeout(()=>intro.classList.add('hide'),1550);
   setTimeout(()=>{
     heroFadeStartedAt=Date.now();
     document.querySelectorAll('.reveal').forEach(el=>el.classList.add('show'));
     startAmbientForCurrentFade();
+    setTimeout(startHeadSequence,HERO_FADE_MS);
   },1650);
 });
 
