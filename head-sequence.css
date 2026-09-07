@@ -1,6 +1,10 @@
 .head-mask{display:none!important}
 .hero-art{position:relative!important;display:flex!important;justify-content:center;align-items:center;mix-blend-mode:screen}
 .hero-art .head-source{visibility:visible!important;display:block;width:100%;height:auto;max-height:470px;object-fit:contain;mix-blend-mode:normal!important}
-.hero-art .head-cover{position:absolute;z-index:5;pointer-events:none;opacity:1;background:rgb(242,229,223);transition:opacity 2.2s ease-in-out;box-shadow:0 0 10px 8px rgb(242,229,223);will-change:opacity}
-.hero-art .head-cover.revealed{opacity:0}
+.hero-art .head-cover{position:absolute;z-index:5;pointer-events:none;opacity:1;background:rgb(242,229,223);box-shadow:0 0 10px 8px rgb(242,229,223);will-change:opacity;animation:uncover-head 2.2s ease-in-out forwards}
+.hero-art .head-cover-1{animation-delay:12s}
+.hero-art .head-cover-2{animation-delay:14.4s}
+.hero-art .head-cover-3{animation-delay:16.8s}
+.hero-art .head-cover-4{animation-delay:19.2s}
+@keyframes uncover-head{0%{opacity:1;visibility:visible}99%{opacity:0;visibility:visible}100%{opacity:0;visibility:hidden}}
 @media(max-width:900px){.hero-art .head-source{max-height:none}}
