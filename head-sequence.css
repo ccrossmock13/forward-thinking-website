@@ -1,0 +1,8 @@
+.head-mask{display:none!important}
+.hero-art{display:grid!important;place-items:center;mix-blend-mode:screen}
+.hero-art .head-source{grid-area:1/1;visibility:hidden;width:100%;height:auto;max-height:470px;object-fit:contain;mix-blend-mode:normal!important}
+.hero-art canvas{grid-area:1/1;display:block;width:100%;height:auto;max-height:470px;object-fit:contain}
+.hero-art .head-base{opacity:1}
+.hero-art .head-layer{opacity:0;transition:opacity 2.2s ease-in-out;will-change:opacity}
+.hero-art .head-layer.visible{opacity:1}
+@media(max-width:900px){.hero-art .head-source,.hero-art canvas{max-height:none}}
