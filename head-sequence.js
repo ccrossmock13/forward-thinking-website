@@ -7,108 +7,63 @@ const HEAD_RECTS=[
   [.6775,.1481,.8730,.5617]
 ];
 
-let headLayersReady=false;
 let pageLoadedAt=null;
 let headSequenceStarted=false;
 
+function buildHeadCovers(){
+  const heroArt=document.querySelector('.hero-art');
+  if(!heroArt||heroArt.querySelector('.head-cover'))return;
+
+  HEAD_RECTS.forEach(([left,top,right,bottom],index)=>{
+    const cover=document.createElement('span');
+    cover.className=`head-cover head-cover-${index+1}`;
+    cover.setAttribute('aria-hidden','true');
+    cover.style.left=`${left*100}%`;
+    cover.style.top=`${top*100}%`;
+    cover.style.width=`${(right-left)*100}%`;
+    cover.style.height=`${(bottom-top)*100}%`;
+    heroArt.appendChild(cover);
+  });
+
+  const source=heroArt.querySelector('.head-source');
+  const syncCoverColor=()=>{
+    if(!source||!source.naturalWidth)return;
+    try{
+      const c=document.createElement('canvas');
+      c.width=1;c.height=1;
+      const ctx=c.getContext('2d');
+      ctx.drawImage(source,0,0,Math.max(1,source.naturalWidth*.06),Math.max(1,source.naturalHeight*.06),0,0,1,1);
+      const [r,g,b]=ctx.getImageData(0,0,1,1).data;
+      document.querySelectorAll('.head-cover').forEach(cover=>{
+        cover.style.backgroundColor=`rgb(${r},${g},${b})`;
+        cover.style.boxShadow=`0 0 10px 8px rgb(${r},${g},${b})`;
+      });
+    }catch(e){}
+  };
+  if(source?.complete)syncCoverColor();
+  else source?.addEventListener('load',syncCoverColor,{once:true});
+}
+
 function scheduleHeadSequence(){
-  if(!headLayersReady||pageLoadedAt===null||headSequenceStarted)return;
+  if(pageLoadedAt===null||headSequenceStarted)return;
+  const covers=document.querySelectorAll('.hero-art .head-cover');
+  if(!covers.length)return;
   headSequenceStarted=true;
   const elapsed=performance.now()-pageLoadedAt;
   const delay=Math.max(0,HEAD_SEQUENCE_TOTAL_DELAY_MS-elapsed);
-  document.querySelectorAll('.hero-art .head-layer').forEach((layer,index)=>{
-    setTimeout(()=>layer.classList.add('visible'),delay+index*HEAD_FADE_STAGGER_MS);
+  covers.forEach((cover,index)=>{
+    setTimeout(()=>cover.classList.add('revealed'),delay+index*HEAD_FADE_STAGGER_MS);
   });
 }
 
-function buildHeadLayers(){
-  const heroArt=document.querySelector('.hero-art');
-  const source=heroArt?.querySelector('.head-source');
-  if(!heroArt||!source||!source.naturalWidth||headLayersReady)return;
-
-  const width=source.naturalWidth;
-  const height=source.naturalHeight;
-  const sourceCanvas=document.createElement('canvas');
-  sourceCanvas.width=width;
-  sourceCanvas.height=height;
-  const sourceCtx=sourceCanvas.getContext('2d',{willReadFrequently:true});
-  sourceCtx.drawImage(source,0,0,width,height);
-  const original=sourceCtx.getImageData(0,0,width,height);
-
-  const base=document.createElement('canvas');
-  base.width=width;
-  base.height=height;
-  base.className='head-base';
-  base.setAttribute('aria-hidden','true');
-  const baseCtx=base.getContext('2d',{willReadFrequently:true});
-  baseCtx.putImageData(original,0,0);
-  const baseData=baseCtx.getImageData(0,0,width,height);
-  const src=original.data;
-  const dst=baseData.data;
-
-  function averageBand(x0,x1,y){
-    const yy0=Math.max(0,y-2),yy1=Math.min(height-1,y+2);
-    let r=0,g=0,b=0,count=0;
-    for(let yy=yy0;yy<=yy1;yy++){
-      for(let xx=Math.max(0,x0);xx<Math.min(width,x1);xx++){
-        const i=(yy*width+xx)*4;
-        r+=src[i];g+=src[i+1];b+=src[i+2];count++;
-      }
-    }
-    return count?[r/count,g/count,b/count]:[240,235,230];
-  }
-
-  const pixelRects=HEAD_RECTS.map(([lx,ty,rx,by])=>[
-    Math.round(lx*width),Math.round(ty*height),Math.round(rx*width),Math.round(by*height)
-  ]);
-
-  pixelRects.forEach(([x0,y0,x1,y1])=>{
-    const band=Math.max(4,Math.round(width*.01));
-    for(let y=y0;y<y1;y++){
-      const left=averageBand(x0-band,x0-2,y);
-      const right=averageBand(x1+2,x1+band,y);
-      const span=Math.max(1,x1-x0-1);
-      for(let x=x0;x<x1;x++){
-        const t=(x-x0)/span;
-        const i=(y*width+x)*4;
-        dst[i]=Math.round(left[0]*(1-t)+right[0]*t);
-        dst[i+1]=Math.round(left[1]*(1-t)+right[1]*t);
-        dst[i+2]=Math.round(left[2]*(1-t)+right[2]*t);
-        dst[i+3]=255;
-      }
-    }
-  });
-  baseCtx.putImageData(baseData,0,0);
-  heroArt.insertBefore(base,source);
-
-  pixelRects.forEach(([x0,y0,x1,y1],index)=>{
-    const layer=document.createElement('canvas');
-    layer.width=width;
-    layer.height=height;
-    layer.className=`head-layer head-layer-${index+1}`;
-    layer.setAttribute('aria-hidden','true');
-    const ctx=layer.getContext('2d');
-    ctx.clearRect(0,0,width,height);
-    ctx.drawImage(source,x0,y0,x1-x0,y1-y0,x0,y0,x1-x0,y1-y0);
-    heroArt.insertBefore(layer,source);
-  });
-
-  headLayersReady=true;
-  heroArt.classList.add('head-sequence-ready');
-  scheduleHeadSequence();
-}
+buildHeadCovers();
 
 window.addEventListener('load',()=>{
   pageLoadedAt=performance.now();
   scheduleHeadSequence();
 });
 
-const headSource=document.querySelector('.hero-art .head-source');
-if(headSource){
-  if(headSource.complete&&headSource.naturalWidth){
-    buildHeadLayers();
-  }else{
-    headSource.addEventListener('load',buildHeadLayers,{once:true});
-    headSource.addEventListener('error',()=>{headSource.style.visibility='visible'},{once:true});
-  }
+if(document.readyState==='complete'){
+  pageLoadedAt=performance.now();
+  scheduleHeadSequence();
 }
